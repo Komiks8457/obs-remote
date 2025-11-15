@@ -1,0 +1,253 @@
+None selected 
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Log Key Filter</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom scrollbar for dark theme */
+        textarea::-webkit-scrollbar {
+            width: 8px;
+        }
+        textarea::-webkit-scrollbar-thumb {
+            background-color: #4b5563; /* Gray-600 */
+            border-radius: 4px;
+        }
+        textarea::-webkit-scrollbar-track {
+            background-color: #1f2937; /* Gray-800 */
+        }
+        /* Style for better font rendering */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #111827; /* Dark BG */
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        'primary-bg': '#1f2937', // Gray-800
+                        'secondary-bg': '#111827', // Gray-900
+                        'text-light': '#f9fafb', // Gray-50
+                        'text-muted': '#9ca3af', // Gray-400
+                        'accent': '#3b82f6', // Blue-500
+                    }
+                }
+            }
+        }
+
+        // --- VK MAPPING (Based on user's provided list) ---
+        
+        // This map is comprehensive, containing the rawcode (decimal) mapped to an object 
+        // with the descriptive name (for logging) and a simple lookup key (for filtering).
+        const VK_MAPPINGS = {
+            1: { descriptive: 'Left mouse button', lookup: 'lbutton' }, 2: { descriptive: 'Right mouse button', lookup: 'rbutton' },
+            3: { descriptive: 'Control-break processing', lookup: 'cancel' }, 4: { descriptive: 'Middle mouse button', lookup: 'mbutton' },
+            5: { descriptive: 'X1 mouse button', lookup: 'xbutton1' }, 6: { descriptive: 'X2 mouse button', lookup: 'xbutton2' },
+            8: { descriptive: 'Backspace key', lookup: 'backspace' }, 9: { descriptive: 'Tab key', lookup: 'tab' },
+            12: { descriptive: 'Clear key', lookup: 'clear' }, 13: { descriptive: 'Enter key', lookup: 'enter' },
+            16: { descriptive: 'Shift key', lookup: 'shift' }, 17: { descriptive: 'Ctrl key', lookup: 'control' },
+            18: { descriptive: 'Alt key', lookup: 'alt' }, 19: { descriptive: 'Pause key', lookup: 'pause' },
+            20: { descriptive: 'Caps lock key', lookup: 'capslock' }, 27: { descriptive: 'Esc key', lookup: 'escape' },
+            32: { descriptive: 'Spacebar key', lookup: 'space' }, 33: { descriptive: 'Page up key', lookup: 'pageup' },
+            34: { descriptive: 'Page down key', lookup: 'pagedown' }, 35: { descriptive: 'End key', lookup: 'end' },
+            36: { descriptive: 'Home key', lookup: 'home' }, 37: { descriptive: 'Left arrow key', lookup: 'arrowleft' },
+            38: { descriptive: 'Up arrow key', lookup: 'arrowup' }, 39: { descriptive: 'Right arrow key', lookup: 'arrowright' },
+            40: { descriptive: 'Down arrow key', lookup: 'arrowdown' }, 45: { descriptive: 'Insert key', lookup: 'insert' },
+            46: { descriptive: 'Delete key', lookup: 'delete' }, 48: { descriptive: '0 key', lookup: '0' },
+            49: { descriptive: '1 key', lookup: '1' }, 50: { descriptive: '2 key', lookup: '2' }, 51: { descriptive: '3 key', lookup: '3' },
+            52: { descriptive: '4 key', lookup: '4' }, 53: { descriptive: '5 key', lookup: '5' }, 54: { descriptive: '6 key', lookup: '6' },
+            55: { descriptive: '7 key', lookup: '7' }, 56: { descriptive: '8 key', lookup: '8' }, 57: { descriptive: '9 key', lookup: '9' },
+            65: { descriptive: 'A key', lookup: 'a' }, 66: { descriptive: 'B key', lookup: 'b' }, 67: { descriptive: 'C key', lookup: 'c' },
+            68: { descriptive: 'D key', lookup: 'd' }, 69: { descriptive: 'E key', lookup: 'e' }, 70: { descriptive: 'F key', lookup: 'f' },
+            71: { descriptive: 'G key', lookup: 'g' }, 72: { descriptive: 'H key', lookup: 'h' }, 73: { descriptive: 'I key', lookup: 'i' },
+            74: { descriptive: 'J key', lookup: 'j' }, 75: { descriptive: 'K key', lookup: 'k' }, 76: { descriptive: 'L key', lookup: 'l' },
+            77: { descriptive: 'M key', lookup: 'm' }, 78: { descriptive: 'N key', lookup: 'n' }, 79: { descriptive: 'O key', lookup: 'o' },
+            80: { descriptive: 'P key', lookup: 'p' }, 81: { descriptive: 'Q key', lookup: 'q' }, 82: { descriptive: 'R key', lookup: 'r' },
+            83: { descriptive: 'S key', lookup: 's' }, 84: { descriptive: 'T key', lookup: 't' }, 85: { descriptive: 'U key', lookup: 'u' },
+            86: { descriptive: 'V key', lookup: 'v' }, 87: { descriptive: 'W key', lookup: 'w' }, 88: { descriptive: 'X key', lookup: 'x' },
+            89: { descriptive: 'Y key', lookup: 'y' }, 90: { descriptive: 'Z key', lookup: 'z' }, 96: { descriptive: 'Numpad 0 key', lookup: 'numpad0' },
+            106: { descriptive: 'Multiply key', lookup: 'multiply' }, 107: { descriptive: 'Add key', lookup: 'add' }, 109: { descriptive: 'Subtract key', lookup: 'subtract' },
+            110: { descriptive: 'Decimal key', lookup: 'decimal' }, 111: { descriptive: 'Divide key', lookup: 'divide' },
+            112: { descriptive: 'F1 key', lookup: 'f1' }, 123: { descriptive: 'F12 key', lookup: 'f12' }, 160: { descriptive: 'Left Shift key', lookup: 'lshift' },
+            161: { descriptive: 'Right Shift key', lookup: 'rshift' }, 162: { descriptive: 'Left Ctrl key', lookup: 'lcontrol' },
+            163: { descriptive: 'Right Ctrl key', lookup: 'rcontrol' }, 164: { descriptive: 'Left Alt key', lookup: 'lmenu' },
+            165: { descriptive: 'Right Alt key', lookup: 'rmenu' }, 186: { descriptive: 'OEM 1 (Semicolon)', lookup: 'oem1' },
+            187: { descriptive: 'OEM Plus (Equals)', lookup: 'oemplus' }, 188: { descriptive: 'OEM Comma', lookup: 'oemcomma' },
+            189: { descriptive: 'OEM Minus (Dash)', lookup: 'oemminus' }, 190: { descriptive: 'OEM Period', lookup: 'oemperiod' },
+            191: { descriptive: 'OEM 2 (Forward Slash)', lookup: 'oem2' }, 192: { descriptive: 'OEM 3 (Grave Accent)', lookup: 'oem3' },
+            219: { descriptive: 'OEM 4 (Left Brace)', lookup: 'oem4' }, 220: { descriptive: 'OEM 5 (Backslash)', lookup: 'oem5' },
+            221: { descriptive: 'OEM 6 (Right Brace)', lookup: 'oem6' }, 222: { descriptive: 'OEM 7 (Apostrophe)', lookup: 'oem7' },
+            // Add other common keys based on the list structure
+            246: { descriptive: 'Attn key', lookup: 'attn' }, 254: { descriptive: 'Clear key (OEM)', lookup: 'oemclear' }
+        };
+
+        // Helper function to map numeric rawcode (from log data) to the descriptive key name and the lookup key.
+        function getRawcodeMapping(rawcode) {
+            const mapping = VK_MAPPINGS[rawcode];
+            if (mapping) {
+                return mapping;
+            }
+
+            // Fallback for unmapped or reserved codes
+            return {
+                descriptive: `RAWCODE_${rawcode}`, 
+                lookup: `rawcode_${rawcode}` 
+            };
+        }
+
+        function processLogs() {
+            const logData = document.getElementById('logData').value.trim();
+            const keyMapText = document.getElementById('keyMap').value.trim();
+            const logOutput = document.getElementById('logOutput');
+            const filteredOutput = document.getElementById('filteredLog');
+
+            let keyMap;
+            const logMessages = [];
+            const filteredLines = [];
+
+            // 1. Parse Key Map
+            try {
+                keyMap = JSON.parse(keyMapText);
+                logMessages.push('Key mapping successfully parsed.');
+            } catch (e) {
+                logOutput.value = `ERROR: Invalid JSON in Key Map Area.\n${e.message}`;
+                return;
+            }
+
+            // Get a set of allowed keys for quick lookup (e.g., {'a', 'd', 'space'})
+            const allowedKeys = new Set(Object.keys(keyMap).map(k => k.toLowerCase()));
+            
+            if (allowedKeys.size === 0) {
+                logOutput.value = 'ERROR: The Key Map JSON is empty. Nothing to filter against.';
+                return;
+            }
+
+            // 2. Process Log Data Line by Line
+            const logLines = logData.split('\n').filter(line => line.trim() !== '');
+            let deletedCount = 0;
+            let skippedMetadataCount = 0;
+
+            logLines.forEach((line, index) => {
+                const lineNumber = index + 1;
+                const trimmedLine = line.trim();
+
+                // Logic 1: Skip key filtering for lines starting with {"metadata": but keep them in the result.
+                if (trimmedLine.startsWith('{"metadata":')) {
+                    logMessages.push(`INFO: Line ${lineNumber} skipped (Metadata Filter, but kept in output).`);
+                    skippedMetadataCount++;
+                    filteredLines.push(line); // Keep the original line in the result set
+                    return; // Skip JSON parsing and key filtering for this line
+                }
+
+                let logEntry;
+                try {
+                    logEntry = JSON.parse(trimmedLine);
+                } catch (e) {
+                    logMessages.push(`WARNING: Line ${lineNumber} is not valid JSON and was skipped.`);
+                    return; // Skip invalid JSON lines
+                }
+
+                // Get time and convert to minutes (if available)
+                const timeInSeconds = logEntry.time || 0;
+                const timeInMinutes = (timeInSeconds / 60).toFixed(2);
+
+                // Logic 2: Check for Mouse Events based on event_type and delete
+                if (logEntry.event_type && logEntry.event_type.startsWith('mouse_')) {
+                    const descriptiveKey = `${logEntry.event_type} (Button: ${logEntry.button !== undefined ? logEntry.button : 'N/A'})`;
+                    logMessages.push(`DELETED LINE ${lineNumber}, [Time: ${timeInMinutes}m, Key: '${descriptiveKey}'] - Removed Non-Keyboard Event`);
+                    deletedCount++;
+                    return;
+                }
+
+                // If it's not a mouse event or metadata, it should be a keyboard event and must have a rawcode
+                const rawcode = logEntry.rawcode;
+                
+                if (rawcode === undefined) {
+                    logMessages.push(`WARNING: Line ${lineNumber} skipped because it lacks a 'rawcode' field.`);
+                    return;
+                }
+
+                // Get the mapping object { descriptive: 'Full Name', lookup: 'simplekey' }
+                const keyMapping = getRawcodeMapping(rawcode);
+
+                // Logic 3: Check if the key is in the allowed keys map
+                if (allowedKeys.has(keyMapping.lookup)) {
+                    // Key is allowed, keep the line
+                    filteredLines.push(line);
+                } else {
+                    // Key is NOT allowed, delete the line and log it
+                    // Format: DELETED LINE {linenumber}, [Time: minutes, Key: DescriptiveKeyName]
+                    logMessages.push(`DELETED LINE ${lineNumber}, [Time: ${timeInMinutes}m, Key: '${keyMapping.descriptive}']`);
+                    deletedCount++;
+                }
+            });
+
+            // 4. Output Results
+            filteredOutput.value = filteredLines.join('\n');
+            
+            const totalProcessed = logLines.length;
+            const linesKept = filteredLines.length;
+            const linesDeleted = deletedCount;
+            const summary = `--- Summary ---\nProcessed ${totalProcessed} total lines. \nLines Kept: ${linesKept}\nLines Deleted (Key/Mouse Filter): ${linesDeleted}\nLines Skipped (Metadata): ${skippedMetadataCount}`;
+            logOutput.value = summary + '\n\n' + logMessages.join('\n');
+            
+            // Show the result section
+            document.getElementById('resultSection').classList.remove('hidden');
+        }
+
+    </script>
+</head>
+<body class="bg-secondary-bg text-text-light min-h-screen p-4 md:p-8">
+
+    <div class="max-w-7xl mx-auto">
+        <h1 class="text-3xl font-bold mb-6 text-accent">Log Key Filter Utility</h1>
+        <p class="mb-6 text-text-muted">
+            Enter your raw log data (one JSON object per line) on the left, and the allowed key mappings (JSON object) on the right. The app will filter the log, keeping only the lines whose <code>rawcode</code> matches a key in the map. Lines starting with <code>{"metadata":</code> are preserved in the output but are excluded from key filtering.
+        </p>
+
+        <!-- Input Area -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <div class="bg-primary-bg p-4 rounded-xl shadow-lg border border-gray-700">
+                <label for="logData" class="block text-lg font-semibold mb-2 text-text-light">1. Raw Log Data (JSON Lines)</label>
+                <textarea id="logData" rows="15" class="w-full bg-gray-900 border border-gray-700 text-text-light p-3 rounded-lg focus:ring-accent focus:border-accent resize-none placeholder-gray-500 text-sm" placeholder="Paste your log data here..."></textarea>
+                <p class="text-sm text-text-muted mt-1">Filtering based on <code>rawcode</code> (e.g., 65 $\rightarrow$ 'A key', 164 $\rightarrow$ 'Left Alt key'). Mouse events are automatically removed.</p>
+            </div>
+
+            <div class="bg-primary-bg p-4 rounded-xl shadow-lg border border-gray-700">
+                <label for="keyMap" class="block text-lg font-semibold mb-2 text-text-light">2. Allowed Key Mappings (JSON Object)</label>
+                <textarea id="keyMap" rows="15" class="w-full bg-gray-900 border border-gray-700 text-text-light p-3 rounded-lg focus:ring-accent focus:border-accent resize-none placeholder-gray-500 text-sm" placeholder="Paste your key mapping JSON here..."></textarea>
+                <p class="text-sm text-text-muted mt-1">Keys should be lowercase (e.g., 'a', 'd', 'space', 'lcontrol').</p>
+            </div>
+        </div>
+
+        <button onclick="processLogs()" class="w-full lg:w-auto px-8 py-3 bg-accent hover:bg-blue-600 text-text-light font-bold rounded-xl shadow-xl transition duration-200 transform hover:scale-[1.02] active:scale-95 mb-8">
+            Filter Logs & Generate Output
+        </button>
+
+        <!-- Result Area -->
+        <div id="resultSection" class="hidden">
+            <h2 class="text-2xl font-bold mb-4 text-accent border-b border-gray-700 pb-2">Results</h2>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Filtered Output -->
+                <div class="bg-primary-bg p-4 rounded-xl shadow-lg border border-gray-700">
+                    <label for="filteredLog" class="block text-lg font-semibold mb-2 text-text-light">Filtered Log Data (Kept Lines)</label>
+                    <textarea id="filteredLog" rows="15" readonly class="w-full bg-gray-900 border border-gray-700 text-green-400 p-3 rounded-lg resize-none placeholder-gray-500 text-sm"></textarea>
+                </div>
+                
+                <!-- Deletion Log -->
+                <div class="bg-primary-bg p-4 rounded-xl shadow-lg border border-gray-700">
+                    <label for="logOutput" class="block text-lg font-semibold mb-2 text-text-light">Deletion Log & Summary (Time in Minutes)</label>
+                    <textarea id="logOutput" rows="15" readonly class="w-full bg-gray-900 border border-gray-700 text-red-400 p-3 rounded-lg resize-none placeholder-gray-500 text-sm"></textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
