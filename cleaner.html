@@ -212,14 +212,12 @@
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
             <div class="bg-primary-bg p-4 rounded-xl shadow-lg border border-gray-700">
                 <label for="logData" class="block text-lg font-semibold mb-2 text-text-light">1. Raw Log Data (JSON Lines)</label>
-                <textarea id="logData" rows="15" class="w-full bg-gray-900 border border-gray-700 text-text-light p-3 rounded-lg focus:ring-accent focus:border-accent resize-none placeholder-gray-500 text-sm" placeholder="Paste your log data here..."></textarea>
-                <p class="text-sm text-text-muted mt-1">Filtering based on <code>rawcode</code> (e.g., 65 $\rightarrow$ 'A key', 164 $\rightarrow$ 'Left Alt key'). Mouse events are automatically removed.</p>
+                <textarea id="logData" rows="15" class="w-full bg-gray-900 border border-gray-700 text-text-light p-3 rounded-lg focus:ring-accent focus:border-accent resize-none placeholder-gray-500 text-sm" placeholder="Paste your log data here..."></textarea>                
             </div>
 
             <div class="bg-primary-bg p-4 rounded-xl shadow-lg border border-gray-700">
                 <label for="keyMap" class="block text-lg font-semibold mb-2 text-text-light">2. Allowed Key Mappings (JSON Object)</label>
                 <textarea id="keyMap" rows="15" class="w-full bg-gray-900 border border-gray-700 text-text-light p-3 rounded-lg focus:ring-accent focus:border-accent resize-none placeholder-gray-500 text-sm" placeholder="Paste your key mapping JSON here..."></textarea>
-                <p class="text-sm text-text-muted mt-1">Keys should be lowercase (e.g., 'a', 'd', 'space', 'lcontrol').</p>
             </div>
         </div>
 
