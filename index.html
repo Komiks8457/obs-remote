@@ -83,14 +83,14 @@
             const mp3 = getAudio();
             const audio = new Audio(mp3); // **Change this path to your sound file**
             audio.loop = true; // Loop the sound until the recording stops
-            audio.volume = 0.1;
+            audio.volume = 1;
             const alertThresholdSeconds = 21 * 60; // 21 minutes in seconds (1260 seconds)
             let isAlerting = false; // Flag to manage the audio state
 
             function beepAtStartStop() {
                 const beepmp3 = getBeep();
                 const beepaudio = new Audio(beepmp3);
-                beepaudio.volume = 0.1;
+                beepaudio.volume = 1;
                 beepaudio.play();
             }
 
