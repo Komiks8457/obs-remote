@@ -31,7 +31,7 @@
 			<div id="connectionInfo">
 				<div class="mb-4">
 					<label for="secondObsIp" class="block text-sm font-medium text-gray-400">OBS IP SA IMONG PARTNER</label>
-					<input type="text" id="secondObsIp" placeholder="e.g., ws://192.168.1.10:4455" value="" class="mt-1 w-full p-2 border border-blue-500 bg-gray-800 text-white rounded-md focus:ring-blue-500 focus:border-blue-500 text-center" />
+					<input type="text" id="secondObsIp" placeholder="192.168.1.10" value="" class="mt-1 w-full p-2 border border-blue-500 bg-gray-800 text-white rounded-md focus:ring-blue-500 focus:border-blue-500 text-center" />
 				</div>
 				<div class="mb-4">
 					<label for="connPassword" class="block text-sm font-medium text-gray-400">CONNECTION PASSWORD</label>
@@ -392,7 +392,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Get live input values 
-        const currentSecondaryUrl = secondaryObs.value; 
+        const currentSecondaryUrl = `ws://${secondaryObs.value}:4455`; 
         const currentPassword = connPassword.value;
 
         // Connection 1 (Primary)
